@@ -1,3 +1,4 @@
+#Some comment
 LM_2_bwamap.sh - maps QTL files to genome (02/12/21 done QB)
 LM_3_SNPCalling.sh - calls SNPs on these files (02/12/21 done QB) 
 LM_4.1_checkSNPs.sh - checks the SNPs for the QTL files at various stages, produces some stats 
