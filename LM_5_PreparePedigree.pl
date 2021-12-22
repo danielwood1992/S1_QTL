@@ -46,7 +46,7 @@ while(!eof(IN)){
 		#So now we will need to....make the fancy new file, eh?
 		$Grand1 = $temp[-1];
  		$Grand2 = $temp[-2];
-		$num_to_go_to = scalar(@temp)-2;
+		$num_to_go_to = scalar(@temp)-3;
 		@QAs = @temp[ 9 .. $num_to_go_to ];
 		#So, then...
 		$num_F2s = scalar(@QAs);
