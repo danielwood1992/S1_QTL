@@ -19,6 +19,7 @@ this_step=$dir1/"QB_LM_6B_Progress.txt";
 parentcall="/scratch/b.bssc1d/Linkage_Mapping/LM_6_LepMap3/QB/QB_Parents_F2s.vcf.ped.parentcall";
 vcf="/scratch/b.bssc1d/Linkage_Mapping/LM_4.2_ParentCalls/QB_Parents_F2s.vcf";
 
+
 #Question 1: Does grandparentphase=1 increase/decrease the number of things pu in LGs?
 
 does_grandparent () {
@@ -121,9 +122,13 @@ does_lodlim () {
 	java -cp ~/LepMap3/bin SeparateChromosomes2 data=$parentcall lodLimit=15 sizeLimit=40 > $parentcall.LM_6B.F.lim15;
 	java -cp ~/LepMap3/bin SeparateChromosomes2 data=$parentcall lodLimit=25 sizeLimit=40 > $parentcall.LM_6B.F.lim25;
 	java -cp ~/LepMap3/bin SeparateChromosomes2 data=$parentcall lodLimit=35 sizeLimit=40 > $parentcall.LM_6B.F.lim35;
+	java -cp ~/LepMap3/bin SeparateChromosomes2 data=$parentcall lodLimit=45 sizeLimit=40 > $parentcall.LM_6B.F.lim45;
+	java -cp ~/LepMap3/bin SeparateChromosomes2 data=$parentcall lodLimit=55 sizeLimit=40 > $parentcall.LM_6B.F.lim55;
+	java -cp ~/LepMap3/bin SeparateChromosomes2 data=$parentcall lodLimit=48 sizeLimit=40 > $parentcall.LM_6B.F.lim48;
+	java -cp ~/LepMap3/bin SeparateChromosomes2 data=$parentcall lodLimit=50 sizeLimit=40 > $parentcall.LM_6B.F.lim50;
+	java -cp ~/LepMap3/bin SeparateChromosomes2 data=$parentcall lodLimit=52 sizeLimit=40 > $parentcall.LM_6B.F.lim52;
 
 	}
-
 export does_lodlim;
 
 if grep -q "LM_6B.F_Complete" $this_step; 
@@ -140,8 +145,50 @@ echo "lodLimit=25";
 perl ~/scripts/S1_QTL/LM_6B_summarise.pl $parentcall.LM_6B.F.lim25;
 echo "lodLimit=35";
 perl ~/scripts/S1_QTL/LM_6B_summarise.pl $parentcall.LM_6B.F.lim35;
+echo "lodLimit=45";
+perl ~/scripts/S1_QTL/LM_6B_summarise.pl $parentcall.LM_6B.F.lim45;
+echo "lodLimit=55";
+perl ~/scripts/S1_QTL/LM_6B_summarise.pl $parentcall.LM_6B.F.lim55;
+echo "lodLimit=48";
+perl ~/scripts/S1_QTL/LM_6B_summarise.pl $parentcall.LM_6B.F.lim48;
+echo "lodLimit=50";
+perl ~/scripts/S1_QTL/LM_6B_summarise.pl $parentcall.LM_6B.F.lim50;
+echo "lodLimit=52";
+perl ~/scripts/S1_QTL/LM_6B_summarise.pl $parentcall.LM_6B.F.lim52;
 
 #So even with an extremely low LOD limit basisclly no change in how many markers are assigned to each chromosome.
+#Update: lodLimit=50 seems to get out the number of chromosomes with a roughly balanced number of markers, which is nice.
+
+#Question 5 (G) - are these ~2k markers noninformative? I just don't get where they're coming from...
+
+noninf="/scratch/b.bssc1d/Linkage_Mapping/LM_6_LepMap3/QB/QB_Parents_F2s.vcf.ped.parentcall.noninf";
+
+does_noninf () {
+	noninf=$1;
+	java -cp ~/LepMap3/bin SeparateChromosomes2 data=$noninf lodLimit=50 sizeLimit=40 > $parentcall.LM_6B.G.noninf;
+	}
+
+export does_noninf;
+
+if grep -q "LM_6B.G_Complete" $this_step; 
+	then echo "LM_6B.G_Complete";
+else 
+	echo "$name Starting 6.6G" >> $this_step && does_noninf $noninf && echo "$name LM_6B.G_Complete" >> $this_step;
+fi;
+
+echo "######";
+echo "Including noninf";
+perl ~/scripts/S1_QTL/LM_6B_summarise.pl $parentcall.LM_6B.G.noninf;
+echo "Excluding noninf";
+perl ~/scripts/S1_QTL/LM_6B_summarise.pl $parentcall.LM_6B.F.lim50
+echo "######"
+
+#Wow ok great getting somewhere - so 1,800 of the 2,000 SNPs are classified as noninformative: 
+#...but there shouln't be noninformative markers? Has something gone wrong in the filtering of the parental SNPs?
+
+#Having compared markers manually, it's clear that the majority of these markers are excluded because the grandparents are heterozygous for them.
+#I'm not sure how we could include them (many of them appear to segregate in a manner that makes sense).
+#We can potentially just not include the grandparents altogether, this should be possible.
 
 #####################
 #So I guess it's now important to get additional markers...
@@ -190,4 +237,5 @@ bcftools stats -s - $vcf.LG1.vcf > $vcf.LG1.stats;
 #to be in linkage disequilibrium with the other ones. Or even each other, much.
 #So not really sure what to make of this.
 #Ordering the markers: well, this seems relatively straightforward/solvable.
+
 
