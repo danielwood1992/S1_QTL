@@ -25,17 +25,18 @@ dat=$(date +%Y_%m_%d);
 
 #previous_step="$dir1/QB_LM_3C_Progress.txt";
 #this_step="$dir1/QB_LM_4_Progress.txt";
+#16/02/22 - This is the old file, which contains 10 duplicates...
 #qx_names="/home/b.bssc1d/scripts/Linkage_Mapping/QB_Names_LGConly.txt.tocopy.txt";
+
+#So let's modify to use the new files...
+
+#16/02/22 - new version of QB names does not contain these files...
 name="QB";
 
-#This will make sure all the files in QX have Step_3_Complete; if not kills the shell.
-woof=$(perl ~/scripts/Linkage_Mapping/list_complete.pl $qx_names $previous_step Step_3C_Complete);
-if [[ $woof != "ALL_COMPLETE" ]]; then echo "Not all complete" && exit; fi;  
 
 truncate -s 0 $dir2/$name.bcfs_tomerge.$dat;
 while read file; do echo $dir2/$file.bam.DP7.bcf.gz.norm.q15 >> $dir2/$name.bcfs_tomerge.$dat; done < $qx_names;
 
-#QB versions deleted...
 #Note: bcftools plugin setGT $vcf -- -t q -n . -i "whatever"
 # -- ; put options for plugin after this
 # -t q -n . -i : repalaces sites that match the immediately following critera with missing data...
