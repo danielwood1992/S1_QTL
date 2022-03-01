@@ -21,7 +21,7 @@ genome="/scratch/b.bssc1d/6Pop_Resequencing/TGS_GC_fmlrc.scaff_seqs.fa";
 dat=$(date +%Y_%m_%d);
 
 #dir1="/scratch/b.bssc1d/Linkage_Mapping"; #For QA
-#dir2="/scratch/b.bssc1d/Linkage_Mapping/QB_Raw"; #For QB
+#dir="/scratch/b.bssc1d/Linkage_Mapping/QB_Raw"; #For QB
 
 #previous_step="$dir1/QB_LM_3C_Progress.txt";
 #this_step="$dir1/QB_LM_4_Progress.txt";
@@ -30,12 +30,26 @@ dat=$(date +%Y_%m_%d);
 
 #So let's modify to use the new files...
 
-#16/02/22 - new version of QB names does not contain these files...
-name="QB";
+cross="QA";
+#cross="QB";
+#cross="QCE";
 
+#So we would need...what...a list of stuff? 
+qx_names="/home/b.bssc1d/scripts/S1_QTL/${cross}_SRA_files.txt";
+progdir="/scratch/b.bssc1d/Linkage_Mapping";
+dir="/scratch/b.bssc1d/Linkage_Mapping/LM1_${cross}"; #Ok then.
+this_step="$progdir/${cross}_LM_4.Progress.txt";
 
-truncate -s 0 $dir2/$name.bcfs_tomerge.$dat;
-while read file; do echo $dir2/$file.bam.DP7.bcf.gz.norm.q15 >> $dir2/$name.bcfs_tomerge.$dat; done < $qx_names;
+#1 Creating list of bcfs to pass to merge...
+truncate -s 0 $dir/$cross.bcfs_tomerge.$dat;
+before="$dir/";
+after=".bam.DP7.bcf.gz.norm.q15";
+awk -v before=$before -v after=$after '{print before$1after}' $qx_names > $dir/$cross.bcfs_tomerge.$dat;
+
+#while read file; do echo $dir/$file.bam.DP7.bcf.gz.norm.q15;  done < $qx_names;
+
+#2 doing the merging...
+echo "Started $dat $cross" >> $this_step && bcftools merge --gvcf $genome --threads 1 -Ob -o $dir/$cross.merged_snps.bcf.gz -l $dir/$cross.bcfs_tomerge.$dat && bcftools view $dir/$cross.merged_snps.bcf.gz -Ov -o $dir/$cross.merged_snps.vcf && bcftools +fill-tags $dir/$cross.merged_snps.bcf.gz -- -t all | bcftools plugin setGT $dir/$cross.merged_snps.vcf -- -t q -n . -i "FMT/DP<7 | FMT/GQ<20 | QUAL<15 | (FMT/GQ > 0 & ((DP4[2]+DP4[3])/(DP4[0]+DP4[1])<0.33333))"  |  bcftools view -i 'F_MISSING<0.05' -m2 -M2 -v snps  -Ob -o $dir/$cross.merged_snps_lowmem.filter2.bcf.gz && bcftools view -Ov -o $dir/$cross.merged_snps_lowmem.filter2.vcf $dir/$cross.merged_snps_lowmem.filter2.bcf.gz && echo "$cross $dat Finished" >> $this_step;
 
 #Note: bcftools plugin setGT $vcf -- -t q -n . -i "whatever"
 # -- ; put options for plugin after this
@@ -45,9 +59,4 @@ while read file; do echo $dir2/$file.bam.DP7.bcf.gz.norm.q15 >> $dir2/$name.bcfs
 #I guess we don't want to end up excluding loads of heterozygotes, but we do want them to be called correctly as heterozygotes?
 #Surely the coverage will be sufficiently high that this shouldnt' matter? Let's do it; and then try again without it and check if it makes a difference...
 #Well let's see how this goes...
-
-echo "Started $dat $name >> $this_step &&
-	bcftools merge --gvcf $genome --threads 5 -Ob -o $dir2/$name.merged_snps.bcf.gz -l $dir2/$name.bcfs_tomerge.$dat && bcftools view $dir2/$name.merged_snps.bcf.gz -Ov -o $dir2/$name.merged_snps.vcf && bcftools +fill-tags $dir2/$name.merged_snps.bcf.gz -- -t all | bcftools plugin setGT $dir2/$name.merged_snps.vcf -- -t q -n . -i FMT/DP<7 | FMT/GQ<20 | QUAL<15 | (FMT/GQ > 0 & ((DP4[2]+DP4[3])/(DP4[0]+DP4[1])<0.33333))  |  bcftools view -i 'F_MISSING<0.2' -m2 -M2 -v snps  -Ob -o $dir2/$name.merged_snps_lowmem.filter2.bcf.gz && bcftools view -Ov -o $dir2/$name.merged_snps_lowmem.filter2.vcf $dir2/$name.merged_snps_lowmem.filter2.bcf.gz && echo $name $dat Finished >> $this_step";
-
-echo "Started $dat $name" >> $this_step && bcftools merge --gvcf $genome --threads 1 -Ob -o $dir2/$name.merged_snps.bcf.gz -l $dir2/$name.bcfs_tomerge.$dat && bcftools view $dir2/$name.merged_snps.bcf.gz -Ov -o $dir2/$name.merged_snps.vcf && bcftools +fill-tags $dir2/$name.merged_snps.bcf.gz -- -t all | bcftools plugin setGT $dir2/$name.merged_snps.vcf -- -t q -n . -i "FMT/DP<7 | FMT/GQ<20 | QUAL<15 | (FMT/GQ > 0 & ((DP4[2]+DP4[3])/(DP4[0]+DP4[1])<0.33333))"  |  bcftools view -i 'F_MISSING<0.05' -m2 -M2 -v snps  -Ob -o $dir2/$name.merged_snps_lowmem.filter2.bcf.gz && bcftools view -Ov -o $dir2/$name.merged_snps_lowmem.filter2.vcf $dir2/$name.merged_snps_lowmem.filter2.bcf.gz && echo "$name $dat Finished" >> $this_step;
 
