@@ -3,6 +3,8 @@ use strict;
 
 #Runtime? Instant
 #Memory requirements: head node fine.
+#WARNING: Assumes that grandparents are the last two entries in the vcf...
+#(Note: manually check these names/add an option in the script...)
 #
 #WARNNNNNNNNNIIIIIIIIINNNNNNNNNGGGGGGGGGGGGGGGGGGGGGGG #EXPLOSIONS#
 #
