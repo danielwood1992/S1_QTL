@@ -11,8 +11,10 @@ dir1="/scratch/b.bssc1d/Linkage_Mapping/LM_4.2_ParentCalls";
 dir2="/scratch/b.bssc1d/Linkage_Mapping/QB_Raw";
 progdir="/scratch/b.bssc1d/Linkage_Mapping";
 
+#Output of LM_4.5A
 parent_file="/home/b.bssc1d/scripts/Linkage_Mapping/LM1_${cross}/${cross}.Parents.merged.filt1.bcf.gz";
-F2_file="";
+#Output of LM_4.6
+F2_file="/home/b.bssc1d/scripts/Linkage_Mapping/LM1_${cross}/${cross}.merged_snps_lowmem.filter2.vcf.0.05";
 
 #QA
 #parents="/home/b.bssc1d/scripts/Linkage_Mapping/QA_Parents.txt";
