@@ -11,6 +11,9 @@ while(!eof(IN)){
 	chomp $line;
 	if ($line =~ m/^#/){
 	}else{
+		if ($line =~ m/\t/){
+			$line = (split/\t/, $line)[0];
+		}
 		$hash{$line}++;
 	}
 }

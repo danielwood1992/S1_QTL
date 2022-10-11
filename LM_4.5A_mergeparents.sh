@@ -6,13 +6,19 @@
 #SBATCH --partition=highmem
 #SBATCH --mem-per-cpu=15G;
 
-#So let's get the parents for each cross into a nice file...
+#cross="QA";
+cross="QB";
+#cross="QCE";
 
-#parents="/home/b.bssc1d/scripts/Linkage_Mapping/QA_Parents.txt";
-#name="QA_Parents"
-parents="/home/b.bssc1d/scripts/S1_QTL/QB_Parents.txt";
-dir="/scratch/b.bssc1d/Linkage_Mapping/LM_4.2_ParentCalls";
-name="QB_Parents"
+#Output: $outdir/$cross.Parents.merged.filt1.bcf.gz:
+#e.g. LM1_QA/QA.Parents.merged.filt1.bcf.gz
+
+#Inputs
+parents="/home/b.bssc1d/scripts/S1_QTL/${cross}_Parents.txt"; #Parent1Name\tParent1_R1.fq.gz\tParent1_R2.fq.gz
+dir="/scratch/b.bssc1d/Linkage_Mapping/LM_4.2_ParentCalls"; #location of bcf.gz parent files
+outdir="/scratch/b.bssc1d/Linkage_Mapping/LM1_${cross}"; 
+progdir="/scratch/b.bssc1d/Linkage_Mapping"; #where you want the progress file
+name="$cross.Parents";
 
 dat=$(date +%Y_%m_%d);
 
@@ -32,22 +38,22 @@ P2_2=$(awk 'NR==2' $parents | cut -f2);
 P2="$dir/$P2_2.$P2_1.DP7.251121filt.bcf.gz";
 ls $P2;
 
+#Gets the individual parent files from the previous steps...
+
 bcftools index $P1;
 bcftools index $P2;
 
 #1 merge sets of SNPs
-bcftools merge -Ob -o $dir/$name.merged.bcf.gz $P1 $P2 && prog="${prog}2";
+#Merges snps | gets rid of those with more than 20% missing data [for 2 parents, equivalent to both being genotyped | fills in tags like MAF etc. | calculates stats....
+
+bcftools merge $P1 $P2 | bcftools view -i 'F_MISSING<0.2' | bcftools +fill-tags -Ob -o $outdir/$name.merged.bcf.gz -- && bcftools stats $outdir/$name.merged.bcf.gz > $outdir/$name.merged.stats && prog="${prog}2";
 
 #Filter for biallelic SNps...
-bcftools view -Ob -o $dir/$name.merged.filt1.bcf.gz -m2 -M2 $dir/$name.merged.bcf.gz && prog="${prog}3";
+#gets biallelic snps | removes those with MAF=0 [i.e. 1/1 1/1] | includes only sites with at least one homozygote. This should leave sites that have 2 alleles, and at least one homozyote.
 
-#So then this does what...sets things with FMT/DP < 2 to 0, removes sites with one of the parents missing...
-bcftools plugin setGT $dir/$name.merged.filt1.bcf.gz -- -t q -n . -i "FMT/DP < 2" | bcftools view -v snps -i 'F_MISSING<0.2' -Ob -o $dir/$name.merged.filt2.bcf.gz && prog="${prog}4";
-
-#So here there has to be at least one homozygote: so either both homozygotes (but biallelic) or one het and one hom.
-bcftools view $dir/$name.merged.filt2.bcf.gz --genotype hom -Ob -o $dir/$name.merged.filt3.bcf.gz && prog="${prog}5";
+bcftools view -m2 -M2 $outdir/$name.merged.bcf.gz | bcftools filter -i 'INFO/MAF > 0' | bcftools view -g hom -Ob -o $outdir/$name.merged.filt1.bcf.gz && bcftools stats --af-bins -s - $outdir/$name.merged.filt1.bcf.gz > $outdir/$name.merged.filt1.stats && prog="${prog}3";
 
 #Convert to vcf
-bcftools view -Ov -o $dir/$name.filt3.vcf $dir/$name.merged.filt3.bcf.gz && prog="${prog}6";
+bcftools view -Ov -o $outdir/$name.filt1.vcf $outdir/$name.merged.filt1.bcf.gz && prog="${prog}4";
 
-if [[ $prog == "123456" ]]; then echo "$name LM_4.5A_Complete" >> $dir/LM_4.5A_Progress.txt; else echo "$name error code $prog" >> $dir/LM_4.5A_Progress.txt; fi;
+if [[ $prog == "1234" ]]; then echo "$name $prog $dat LM_4.5A_Complete" >> $progdir/LM_4.5A_Progress.txt; else echo "$name $dat error code $prog" >> $progdir/LM_4.5A_Progress.txt; fi;

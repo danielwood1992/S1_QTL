@@ -41,4 +41,3 @@ call_snps() {
 export -f call_snps;
 
 parallel --colsep "\t" -j 7 "call_snps {2} $dir1 $genome $dir2 {1}" :::: $parent_list;
-

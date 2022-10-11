@@ -55,17 +55,22 @@ prog=1;
 
 #1 Left normalise
 #need to add genome...
-bcftools norm -m +any --fasta-ref $genome $dir/$bcf_name -Ob -o $dir/$bcf_name.norm && prog="${prog}2"; 
+#bcftools norm -m +any --fasta-ref $genome $dir/$bcf_name -Ob -o $dir/$bcf_name.norm && prog="${prog}2"; 
 
 #2 Filter
-bcftools filter -e 'FMT/DP<4 | FMT/GQ<15 | QUAL<15 | FMT/DP>15 | (FMT/GQ > 0 & ((DP4[2]+DP4[3])/(DP4[0]+DP4[1])<0.33333))' -Ob -o $dir/$name.$nicename.DP7.251121filt.bcf.gz $dir/$bcf_name.norm && prog="${prog}3";  
+#bcftools filter -e 'FMT/DP<4 | FMT/GQ<15 | QUAL<15 | FMT/DP>15 | (FMT/GQ > 0 & ((DP4[2]+DP4[3])/(DP4[0]+DP4[1])<0.33333))' -Ob -o $dir/$name.$nicename.DP7.251121filt.bcf.gz $dir/$bcf_name.norm && prog="${prog}3";  
+
+prog=123;
+#3 Reculate?
+
+bcftools +fill-tags $dir/$name.$nicename.DP7.251121filt.bcf.gz -Ob -o $dir/$name.$nicename.DP7.251121filt.tags.bcf.gz -- -t all && prog="${prog}4"; 
 
 #3 Calculate stats...
-bcftools stats $dir/$name.$nicename.DP7.251121filt.bcf.gz > $dir/$name.$nicename.DP7.251121filt.stats && prog="${prog}4";
+bcftools stats $dir/$name.$nicename.DP7.251121filt.tags.bcf.gz > $dir/$name.$nicename.DP7.251121filt.stats && prog="${prog}5";
 
 #4 Index
-bcftools index $dir/$name.$nicename.DP7.251121filt.bcf.gz && prog="${prog}5";
+bcftools index $dir/$name.$nicename.DP7.251121filt.tags.bcf.gz && prog="${prog}6";
 
 #5 Report progress
-if [[ $prog == "12345" ]]; then echo "$name $prog $dat LM_4.3_Complete" >> $progdir/LM_4.3_Progress.txt; else echo "$name $dat error code $prog" >> $progdir/LM_4.3_Progress.txt; fi;
+if [[ $prog == "123456" ]]; then echo "$name $prog $dat LM_4.3_Complete" >> $progdir/LM_4.3_Progress.txt; else echo "$name $dat error code $prog" >> $progdir/LM_4.3_Progress.txt; fi;
 

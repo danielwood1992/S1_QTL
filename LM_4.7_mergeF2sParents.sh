@@ -15,12 +15,10 @@
 #Outputs : $outdir/${cross}_Parents_F2s.vcf
 #        e.g. LM1_QA/QA_Parents_F2s.vcf
 
-dir1="/scratch/b.bssc1d/Linkage_Mapping/LM_4.2_ParentCalls";
-dir2="/scratch/b.bssc1d/Linkage_Mapping/QB_Raw";
 progdir="/scratch/b.bssc1d/Linkage_Mapping";
 
-cross="QA";
-#cross="QB";
+#cross="QA";
+cross="QB";
 #cross="QCE";
 
 #Output of LM_4.5A
