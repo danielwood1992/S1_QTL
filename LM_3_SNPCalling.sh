@@ -72,6 +72,9 @@ perl ~/scripts/Linkage_Mapping/list_keepdelete.pl $qx_names $step_3B Step_3B_Com
 
 parallel --colsep "\t" -j 20 "echo Started $dat {1} >> $step_3C && bcftools +fill-tags $dir/{1}.bam.DP7.bcf.gz.norm -- -t all | bcftools filter -e 'QUAL<15' -Ob -o $dir/{1}.bam.DP7.bcf.gz.norm.q15 && bcftools index -f $dir/{1}.bam.DP7.bcf.gz.norm.q15 && bcftools stats $dir/{1}.bam.DP7.bcf.gz.norm.q15 > $dir/{1}.bam.DP7.bcf.gz.norm.q15.stats &&  echo {1} $dat Step_3C_Complete >> $step_3C" :::: $qx_names.kdel.$dat.LM3CToDo; 
 
+#So you just get rid of the QUAL<15 ones here. 
+#What did we learn from that other SNP calling can't remember...
+
 #Done: 06/01/22 
 
 echo "End of script";
