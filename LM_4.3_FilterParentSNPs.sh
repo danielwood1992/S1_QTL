@@ -58,7 +58,7 @@ prog=1;
 #bcftools norm -m +any --fasta-ref $genome $dir/$bcf_name -Ob -o $dir/$bcf_name.norm && prog="${prog}2"; 
 
 #2 Filter
-#bcftools filter -e 'FMT/DP<4 | FMT/GQ<15 | QUAL<15 | FMT/DP>15 | (FMT/GQ > 0 & ((DP4[2]+DP4[3])/(DP4[0]+DP4[1])<0.33333))' -Ob -o $dir/$name.$nicename.DP7.251121filt.bcf.gz $dir/$bcf_name.norm && prog="${prog}3";  
+bcftools filter -e 'FMT/DP<4 | FMT/GQ<15 | QUAL<15 | FMT/DP>15 | (FMT/GQ > 0 & ((DP4[2]+DP4[3])/(DP4[0]+DP4[1])<0.33333))' -Ob -o $dir/$name.$nicename.DP7.251121filt.bcf.gz $dir/$bcf_name.norm && prog="${prog}3";  
 
 prog=123;
 #3 Reculate?
